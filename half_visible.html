@@ -75,39 +75,39 @@
     }
 
 	// Half & half
-    // var totalLength = 0;
-    // {
-    //     len = length(standPoints[0][0], standPoints[0][1]);
-    //     totalLength = len * standPoints.length;
-    //     texture.push([totalLength / 2, {
-    //         width: 2,
-    //         color: "#FF0000"
-    //     }]);
-    //     texture.push([totalLength, {
-    //         width: 2,
-    //         color: "#00FF00"
-    //     }]);
-    // }
-
-    // Strip
     var totalLength = 0;
     {
         len = length(standPoints[0][0], standPoints[0][1]);
         totalLength = len * standPoints.length;
-        for (var i = 0; i < standPoints.length; i++) {
-        	texture.push([len / 5, {
-            	width: 2,
-            	color: "#00FF00"
-        	}]);
-        	texture.push([4*len / 5, {
-            	width: 2,
-            	color: "#FF0000"
-        	}]);
-        }
-        for (var i = 1; i < texture.length; i++) {
-        	texture[i][0] += texture[i - 1][0]
-        }
+        texture.push([totalLength / 2, {
+            width: 2,
+            color: "#FF0000"
+        }]);
+        texture.push([totalLength, {
+            width: 2,
+            color: "#00FF00"
+        }]);
     }
+
+    // Strip
+    // var totalLength = 0;
+    // {
+    //     len = length(standPoints[0][0], standPoints[0][1]);
+    //     totalLength = len * standPoints.length;
+    //     for (var i = 0; i < standPoints.length; i++) {
+    //     	texture.push([len / 4, {
+    //         	width: 1,
+    //         	color: "#00FF00"
+    //     	}]);
+    //     	texture.push([3*len / 4, {
+    //         	width: 1,
+    //         	color: "#FF0000"
+    //     	}]);
+    //     }
+    //     for (var i = 1; i < texture.length; i++) {
+    //     	texture[i][0] += texture[i - 1][0]
+    //     }
+    // }
 
     // // Regional
     // var totalLength = 0;
@@ -140,6 +140,9 @@
                 polySeg = poly[j];
                 if (polySeg[2]) {
                     draw.polyline([polySeg[0], polySeg[1]]).fill('none').stroke(stroke);
+                } else {
+                    thinStroke = {width: 1, color: stroke.color}
+                    draw.polyline([polySeg[0], polySeg[1]]).fill('none').stroke(thinStroke);
                 }
             } catch(err) {
                 console.log("error")

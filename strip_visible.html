@@ -96,11 +96,11 @@
         totalLength = len * standPoints.length;
         for (var i = 0; i < standPoints.length; i++) {
         	texture.push([len / 5, {
-            	width: 2,
+            	width: 4,
             	color: "#00FF00"
         	}]);
         	texture.push([4*len / 5, {
-            	width: 2,
+            	width: 4,
             	color: "#FF0000"
         	}]);
         }
@@ -140,6 +140,9 @@
                 polySeg = poly[j];
                 if (polySeg[2]) {
                     draw.polyline([polySeg[0], polySeg[1]]).fill('none').stroke(stroke);
+                } else {
+                    thinStroke = {width: 1, color: stroke.color}
+                    draw.polyline([polySeg[0], polySeg[1]]).fill('none').stroke(thinStroke);
                 }
             } catch(err) {
                 console.log("error")
