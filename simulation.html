@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Tactile Display Simulation</title>
+    <script src="svg.js" type="text/javascript" charset="utf-8"></script>
+    <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+</head>
+
+<body>
+    <h1>Tactile Display Simulation</h1>
+    <div id="drawing">
+    </div>
+    <script type="text/javascript" charset="utf-8">
+    // Variable needed for drawing
+    var standPoints = [];
+    var texture = [];
+    // Generate stand points
+
+    // Regular
+    {
+        var SPleftX = 0,
+            SPrightX = 200,
+            SPpitch = 5,
+            SPcount = 40;
+        var SPrightY0 = 0,
+            SPleftY0 = SPpitch / 2;
+        var SPleft = [],
+            SPright = [];
+        var tempLeftY = SPrightY0,
+            tempRightY = SPleftY0;
+        for (var i = 0; i < SPcount; i++) {
+            SPleft.push([SPleftX, tempLeftY])
+            SPright.push([SPrightX, tempRightY])
+            tempLeftY += SPpitch;
+            tempRightY += SPpitch;
+        }
+        for (var i = 0; i < SPleft.length + SPright.length; i++) {
+            if (i % 2 == 0) {
+                standPoints.push(SPleft[i / 2]);
+            } else {
+                standPoints.push(SPright[(i - 1) / 2]);
+            }
+        }
+    }
+
+    // Circle
+    // {
+    // 	var pointsCount = 97;
+    // 	var radius = 100;
+    // 	var step = 45;
+    // 	var pointsOnCircle = [];
+    // 	var unitAngle = 2 * Math.PI / 97;
+    // 	for (var i = 0; i < pointsCount	; i++) {
+    // 		pointsOnCircle.push([radius + radius * Math.cos(unitAngle * i), radius + radius * Math.sin(unitAngle * i)]);
+    // 	}
+    // 	standPoints.push(pointsOnCircle[0])
+    // 	curPoint = step;
+    // 	while(curPoint !== 0) {
+    // 		standPoints.push(pointsOnCircle[curPoint]);
+    // 		curPoint += step;
+    // 		curPoint %= pointsOnCircle.length
+    // 	}
+
+    // }
+
+    // Generate texture
+
+    // Utils
+    function length(p1, p2) {
+        return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
+    }
+
+	// // Half & half
+    // var totalLength = 0;
+    // {
+    //     len = length(standPoints[0], standPoints[1]);
+    //     totalLength = len * standPoints.length;
+    //     texture.push([totalLength / 2, {
+    //         width: 1,
+    //         color: "#FF0000"
+    //     }]);
+    //     texture.push([totalLength, {
+    //         width: 1,
+    //         color: "#00FF00"
+    //     }]);
+    // }
+
+    // Strip
+    // var totalLength = 0;
+    // {
+    //     len = length(standPoints[0], standPoints[1]);
+    //     totalLength = len * standPoints.length;
+    //     for (var i = 0; i < standPoints.length; i++) {
+    //     	texture.push([len / 4, {
+    //         	width: 1,
+    //         	color: "#00FF00"
+    //     	}]);
+    //     	texture.push([3*len / 4, {
+    //         	width: 1,
+    //         	color: "#FF0000"
+    //     	}]);
+    //     }
+    //     for (var i = 1; i < texture.length; i++) {
+    //     	texture[i][0] += texture[i - 1][0]
+    //     }
+    // }
+
+    // // Regional
+    var totalLength = 0;
+    {
+        len = length(standPoints[0], standPoints[1]);
+        totalLength = len * standPoints.length;
+        for (var i = 0; i < len / 2 / SPpitch; i++) {
+        	texture.push([3 * len / 4, {
+            	width: 1,
+            	color: "#FF0000"
+        	}]);
+        	texture.push([len / 4, {
+            	width: 1,
+            	color: "#00FF00"
+        	}]);
+        }
+        for (var i = 1; i < texture.len; i++) {
+        	texture[i][0] += texture[i - 1][0]
+        }
+    }
+
+    // Draw objects
+    var draw = SVG("drawing").size(300, 300);
+
+    function refresh(text) {
+    	draw.clear()
+
+        function cut(p1, p2, len) {
+            if (length(p1, p2) == 0) {
+                return p1;
+            }
+            ratio = len / length(p1, p2);
+
+            function scale(x, y, ratio) {
+                return (y - x) * ratio + x;
+            }
+            newp2 = [scale(p1[0], p2[0], ratio), scale(p1[1], p2[1], ratio)]
+            return newp2
+        }
+
+        function cutPoly(poly, len) {
+            last = poly[0]
+            prev = [poly[0]]
+            next = []
+            for (var i = 1; i < poly.length; i++) {
+                curLen = length(last, poly[i]);
+                if (curLen > len) {
+                    breakPoint = cut(last, poly[i], len)
+                    prev.push(breakPoint)
+                    next = poly.slice()
+                    next.splice(0, i, breakPoint)
+                    break;
+                } else {
+                    prev.push(poly[i]);
+                    last = poly[i];
+                    len -= curLen;
+                }
+            }
+            if (next == []) {
+            	next = [breakPoint, breakPoint]
+            }
+            return [prev, next]
+        }
+        var poly = standPoints;
+        var curPoly;
+        lastPos = 0;
+        for (i = 0; i < text.length; i++) {
+            var pos = text[i][0]
+            var stroke = text[i][1]
+            cuttedPoly = cutPoly(poly, pos - lastPos)
+            curPoly = cuttedPoly[0]
+            poly = cuttedPoly[1]
+            try {
+            	draw.polyline(curPoly).fill('none').stroke(stroke);
+        	} catch(err) {
+        		console.log("error")
+        	}
+            lastPos = pos;
+        }
+        draw.polyline(poly).fill('none').stroke(text[0][1]);
+    }
+    refresh(texture);
+    $('html').bind('mousewheel DOMMouseScroll', function(e) {
+        var delta = (e.originalEvent.wheelDelta || -e.originalEvent.detail);
+        for (var i = texture.length - 1; i >= 0; i--) {
+        	texture[i][0] += delta + totalLength;
+        	texture[i][0] %= totalLength;
+        }
+        texture = texture.sort(function(a, b) {return a[0] - b[0]});
+        console.log(texture);
+        refresh(texture);
+    });
+    </script>
+</body>
+
+</html>
